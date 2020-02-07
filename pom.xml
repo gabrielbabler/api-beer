@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.beers</groupId>
-	<artifactId>demo</artifactId>
+	<artifactId>beers</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>beers</name>
 	<description>Microservice CRUD Beers</description>
