@@ -2,6 +2,8 @@ package com.beers.api.domain;
 
 import javax.persistence.Entity;
 
+import com.beers.api.response.BeerResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,4 +19,13 @@ public class BeerDomain {
 	private String name;
 	private Double price;
 	private String description;
+	
+	public BeerResponse convertToResponse() {
+		return BeerResponse.builder()
+				.id(id)
+				.name(name)
+				.price(price)
+				.description(description)
+				.build();
+	}
 }

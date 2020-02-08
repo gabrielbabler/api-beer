@@ -7,5 +7,5 @@ import com.beers.api.domain.BeerDomain;
 
 @Repository
 public interface BeerRepository extends JpaRepository<BeerDomain, String>{
-
+	public BeerDomain findByName(String name);
 }
