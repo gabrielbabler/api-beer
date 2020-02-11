@@ -37,9 +37,9 @@ public class BeerService {
 	 * @return BeerResponse
 	 * @throws Exception caso não exista o id informado na base de dados
 	 */
-	public Optional<BeerResponse> getBeerById(Integer id) throws Exception {
-		return Optional.ofNullable(beerRepository.findById(id.toString()) 
-				.map(BeerDomain::convertToResponse))
+	public BeerResponse getBeerById(Integer id) throws Exception {
+		return beerRepository.findById(id.toString()) 
+				.map(BeerDomain::convertToResponse)
 				.orElseThrow(Exception::new);
 	}
 	
@@ -48,8 +48,8 @@ public class BeerService {
 	 * @param beerRequest body de requisição com os dados da cerveja
 	 * @throws Exception caso já exista uma cerveja com este nome
 	 */
-	public void createNewBeer(BeerRequest beerRequest) throws Exception {
-		if (!StringUtils.isEmpty(beerRepository.findByName(beerRequest.getName()))) {
+	public BeerResponse createNewBeer(BeerRequest beerRequest) throws Exception {
+		if (!beerRepository.findByName(beerRequest.getName()).isPresent()) {
 			beerRepository.save(beerRequest.convertToDomain());
 		}
 		throw new Exception();
@@ -62,11 +62,11 @@ public class BeerService {
 	 * @throws Exception é lançado caso não exista na base de dados
 	 */
 	public void updateBeerById(Integer id, BeerRequest beerRequest) throws Exception {
-		if (beerRepository.findById(id.toString()).isPresent()) {
-			beerRepository.save(fieldsValidation(id, beerRequest));
-		} else {
+		Optional<BeerDomain> domain = beerRepository.findById(id.toString());
+		if (!domain.isPresent()) {
 			throw new Exception();
 		}
+		beerRepository.save(buildNewBeerDomain(domain.get(), beerRequest));
 	}
 	
 	/**
@@ -75,11 +75,10 @@ public class BeerService {
 	 * @throws Exception é lançado caso o id não exista na base de dados
 	 */
 	public void deleteBeerById(Integer id) throws Exception {
-		if (beerRepository.findById(id.toString()).isPresent()) {
-			beerRepository.deleteById(id.toString());
-		} else {
+		if (!beerRepository.findById(id.toString()).isPresent()) {
 			throw new Exception();
 		}
+		beerRepository.deleteById(id.toString());
 	}
 	
 	/**
@@ -89,16 +88,13 @@ public class BeerService {
 	 * @return BeerDomain com os valores atualizados
 	 * @throws Exception caso seja atualizado o nome e este nome já exista na base de dados
 	 */
-	private BeerDomain fieldsValidation(Integer id, BeerRequest beerRequest) throws Exception {
-		BeerDomain domain = beerRepository.findById(id.toString()).get(); 
-				
-		if (StringUtils.isEmpty(beerRepository.findByName(beerRequest.getName()))) { 
-			domain.setName(beerRequest.getName());
-		} else {
+	private BeerDomain buildNewBeerDomain(BeerDomain domain, BeerRequest beerRequest) throws Exception {
+		if (beerRepository.findByName(beerRequest.getName()).isPresent()) { 
 			throw new Exception();
 		}
+		domain.setName(beerRequest.getName());
 		
-		if (!StringUtils.isEmpty(beerRequest.getPrice())) {
+		if (beerRequest.getPrice() != null) {
 			domain.setPrice(beerRequest.getPrice());
 		}
 		if (!StringUtils.isEmpty(beerRequest.getDescription())) {
